@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรมคำนวณดัชนีมวลกาย (BMI)</title> <!-- Updated title -->
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Inter font and general body */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e0f2f7; /* Light cyan background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #cfd8dc; /* Light border */
+        }
+        h1 {
+            color: #00796b; /* Dark teal heading */
+            font-weight: bold;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #37474f; /* Dark gray label */
+            font-size: 1.1rem;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #b0bec5; /* Light gray border */
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #00bcd4; /* Cyan focus border */
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.3);
+        }
+        button {
+            background-color: #00bcd4; /* Cyan button */
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #00acc1; /* Darker cyan on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 188, 212, 0.3);
+        }
+        #result-display {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f7fa; /* Lighter cyan background for result */
+            border-radius: 15px;
+            border: 1px solid #b2ebf2; /* Light cyan border */
+            min-height: 100px; /* Ensure space for result */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            color: #006064; /* Darker teal text */
+            font-weight: 500;
+        }
+        #bmi-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #004d40; /* Even darker teal for BMI value */
+            margin-bottom: 10px;
+        }
+        #bmi-category {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #00796b; /* Dark teal for category */
+        }
+        .error-message {
+            color: #d32f2f; /* Red for error messages */
+            font-size: 0.9rem;
+            margin-top: 5px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>โปรแกรมคำนวณดัชนีมวลกาย (BMI)</h1> <!-- Updated heading -->
+        
+        <div class="input-group">
+            <label for="weight">น้ำหนัก (กิโลกรัม):</label>
+            <input type="number" id="weight" placeholder="เช่น 65" min="1" step="0.1">
+            <p id="weight-error" class="error-message hidden">กรุณาป้อนน้ำหนักที่ถูกต้อง</p>
+        </div>
+        
+        <div class="input-group">
+            <label for="height">ส่วนสูง (เซนติเมตร):</label>
+            <input type="number" id="height" placeholder="เช่น 170" min="1" step="0.1">
+            <p id="height-error" class="error-message hidden">กรุณาป้อนส่วนสูงที่ถูกต้อง</p>
+        </div>
+        
+        <button onclick="calculateBMI()">คำนวณ BMI</button>
+        
+        <div id="result-display" class="hidden">
+            <p>BMI ของคุณคือ:</p>
+            <p id="bmi-value" class="font-bold text-4xl text-green-700"></p>
+            <p id="bmi-category" class="text-xl text-green-600"></p>
+        </div>
+    </div>
+
+    <script>
+        // Function to calculate BMI
+        function calculateBMI() {
+            const weightInput = document.getElementById('weight');
+            const heightInput = document.getElementById('height');
+            const bmiValueDisplay = document.getElementById('bmi-value');
+            const bmiCategoryDisplay = document.getElementById('bmi-category');
+            const resultDisplay = document.getElementById('result-display');
+            const weightError = document.getElementById('weight-error');
+            const heightError = document.getElementById('height-error');
+
+            // Hide previous errors and result
+            weightError.classList.add('hidden');
+            heightError.classList.add('hidden');
+            resultDisplay.classList.add('hidden');
+
+            const weight = parseFloat(weightInput.value);
+            const heightCm = parseFloat(heightInput.value);
+
+            let isValid = true;
+
+            // Validate inputs
+            if (isNaN(weight) || weight <= 0) {
+                weightError.classList.remove('hidden');
+                isValid = false;
+            }
+            if (isNaN(heightCm) || heightCm <= 0) {
+                heightError.classList.remove('hidden');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return; // Stop if inputs are invalid
+            }
+
+            // Convert height from cm to meters
+            const heightM = heightCm / 100;
+
+            // Calculate BMI: weight (kg) / (height (m) * height (m))
+            const bmi = weight / (heightM * heightM);
+            const roundedBmi = bmi.toFixed(2); // Round to 2 decimal places
+
+            // Determine BMI category
+            let category = '';
+            if (bmi < 18.5) {
+                category = 'น้ำหนักน้อยกว่าเกณฑ์';
+                bmiCategoryDisplay.style.color = '#ff9800'; // Orange for underweight
+                bmiValueDisplay.style.color = '#e65100';
+            } else if (bmi >= 18.5 && bmi <= 24.9) {
+                category = 'น้ำหนักปกติ';
+                bmiCategoryDisplay.style.color = '#4caf50'; // Green for normal
+                bmiValueDisplay.style.color = '#2e7d32';
+            } else if (bmi >= 25 && bmi <= 29.9) {
+                category = 'น้ำหนักเกิน';
+                bmiCategoryDisplay.style.color = '#ffc107'; // Yellow for overweight
+                bmiValueDisplay.style.color = '#ff8f00';
+            } else if (bmi >= 30 && bmi <= 34.9) {
+                category = 'โรคอ้วนระดับ 1';
+                bmiCategoryDisplay.style.color = '#ff9800'; // Orange for obesity class 1
+                bmiValueDisplay.style.color = '#e65100';
+            } else if (bmi >= 35 && bmi <= 39.9) {
+                category = 'โรคอ้วนระดับ 2';
+                bmiCategoryDisplay.style.color = '#ff5722'; // Deep orange for obesity class 2
+                bmiValueDisplay.style.color = '#d84315';
+            } else {
+                category = 'โรคอ้วนระดับ 3 (อันตราย)';
+                bmiCategoryDisplay.style.color = '#f44336'; // Red for obesity class 3
+                bmiValueDisplay.style.color = '#c62828';
+            }
+
+            // Display results
+            bmiValueDisplay.textContent = roundedBmi;
+            bmiCategoryDisplay.textContent = category;
+            resultDisplay.classList.remove('hidden'); // Show the result section
+        }
+    </script>
+</body>
+</html>
